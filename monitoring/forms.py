@@ -1,6 +1,9 @@
-from django.contrib.auth.forms import AuthenticationForm, BaseUserCreationForm
+import uuid
+from datetime import timedelta
 
-from monitoring.models import User
+from django.contrib.auth.forms import AuthenticationForm, BaseUserCreationForm, UserCreationForm
+from django.utils.timezone import now
+from monitoring.models import User, EmailVerification
 
 
 class LoginForm(AuthenticationForm):
@@ -10,7 +13,14 @@ class LoginForm(AuthenticationForm):
 
 
 # TODO
-#class RegisterForm(UserCreationForm):
-#    class Meta:
-#        model = User
-#        fields = ('username', 'email')
+class RegistrationForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'username', 'email', 'password1', 'password2')
+
+    def save(self, commit=True):
+        user = super(RegistrationForm, self).save(commit=True)
+        expired_at = now() + timedelta(hours=24)
+        record = EmailVerification.objects.create(verification_code=uuid.uuid4(), user=user, expired_at=expired_at)
+        record.send_verification_email()
+        return user
