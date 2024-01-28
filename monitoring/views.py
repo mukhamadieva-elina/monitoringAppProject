@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from monitoring.forms import LoginForm, RegistrationForm
-from monitoring.models import User
+from monitoring.models import User, EmailVerification
 
 
 def index(request):
@@ -39,3 +39,16 @@ def registration(request):
         form = RegistrationForm
     context = {'form': form}
     return render(request, 'registration.html', context)
+
+
+def verification(request, **kwargs):
+    if request.method == 'GET':
+        verification_code = kwargs['verification_code']
+        user = User.objects.get(email=kwargs['email'])
+        email_verification = EmailVerification.objects.filter(user=user, verification_code=verification_code)
+        if email_verification.exists():
+            user.is_verified = True
+            user.save()
+            return HttpResponseRedirect(reverse('login'))
+        else:
+            return HttpResponseRedirect(reverse('index'))

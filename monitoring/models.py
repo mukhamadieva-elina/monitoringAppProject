@@ -44,8 +44,7 @@ class EmailVerification(models.Model):
         return f'EmailVerification for user: {self.user.email}'
 
     def send_verification_email(self):
-        #link = reverse('index', kwargs={'email': self.user.email, 'verification_code': self.verification_code})
-        link = reverse('index')
+        link = reverse('verification', kwargs={'email': self.user.email, 'verification_code': self.verification_code})
         verification_link = f'{settings.DOMAIN_NAME}{link}'
         subject = 'Verification'
         message = f'Your verification link {verification_link}'

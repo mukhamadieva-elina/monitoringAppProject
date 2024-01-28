@@ -24,5 +24,6 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('login/', views.login, name='login'),
     path('registration/', views.registration, name='registration'),
-    path('monitoring/', include('monitoring.urls', namespace='monitoring'))
+    path('monitoring/', include('monitoring.urls', namespace='monitoring')),
+    path('verification/<str:email>/<uuid:verification_code>/', views.verification, name='verification')
 ]
