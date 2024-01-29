@@ -25,5 +25,8 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path('registration/', views.registration, name='registration'),
     path('monitoring/', include('monitoring.urls', namespace='monitoring')),
-    path('verification/<str:email>/<uuid:verification_code>/', views.verification, name='verification')
+    path('verification/<str:email>/<uuid:verification_code>/', views.verification, name='verification'),
+    path('profile/', views.profile, name='profile'),
+    path('logout/', views.logout, name='logout'),
+    path('wb/', views.wildberries, name='wildberries')
 ]

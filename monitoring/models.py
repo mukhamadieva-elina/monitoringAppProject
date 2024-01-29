@@ -6,6 +6,8 @@ from django.conf import settings
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
+from monitoring.wb_api_service import get_product_info
+
 
 class Marketplace(models.Model):
     name = models.CharField(max_length=30)
@@ -17,6 +19,27 @@ class Product(models.Model):
     availability = models.BooleanField()
     price = models.DecimalField(max_digits=15, decimal_places=2, null=False)
     marketplace = models.ForeignKey(Marketplace, on_delete=models.CASCADE, null=False)
+
+    def __str__(self):
+        return self.title
+    @staticmethod
+    def create_product(article, marketplace_name):
+        marketplace = Marketplace.objects.get(name='Wildberries')
+        product = Product.objects.filter(article=article)
+        if not product:
+            product = get_product_info(article)
+            title = product[0]['name']
+            availability = False
+            for size in product[0]['sizes']:
+                if len(size['stocks']):
+                    availability = True
+                    break
+            if availability:
+                price = product[0]['salePriceU'] / 100
+            else:
+                price = -1
+            return Product.objects.create(article=article, title=title, availability=availability, price=price,
+                                          marketplace=marketplace)
 
 
 class User(AbstractUser):

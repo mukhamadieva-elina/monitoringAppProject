@@ -1,14 +1,16 @@
 from django.contrib import auth
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from monitoring.forms import LoginForm, RegistrationForm
-from monitoring.models import User, EmailVerification
+from monitoring.forms import LoginForm, RegistrationForm, ProfileForm
+from monitoring.models import User, EmailVerification, Product
 
 
 def index(request):
-    return HttpResponse("INDEX")
+    context = {}
+    return render(request, 'index.html', context)
 
 
 def login(request):
@@ -26,6 +28,11 @@ def login(request):
         form = LoginForm()
     context = {'form': form}
     return render(request, 'login.html', context)
+
+
+def logout(request):
+    auth.logout(request)
+    return HttpResponseRedirect(reverse('index'))
 
 
 def registration(request):
@@ -52,3 +59,28 @@ def verification(request, **kwargs):
             return HttpResponseRedirect(reverse('login'))
         else:
             return HttpResponseRedirect(reverse('index'))
+
+
+@login_required
+def profile(request):
+    if request.method == 'POST':
+        form = ProfileForm(instance=request.user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('profile'))
+        else:
+            print(form.errors)
+    else:
+        form = ProfileForm(instance=request.user)
+    context = {'form': form}
+    return render(request, 'profile.html', context)
+
+
+# TODO
+def wildberries(request):
+    products = Product.objects.all()
+    list_products = []
+    for product in products:
+        list_products.append(product.__str__())
+    context = {'products': products}
+    return render(request, 'marketplace.html', context)

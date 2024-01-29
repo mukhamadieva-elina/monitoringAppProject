@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+</head>
+<body>
+<p>Профиль</p>
+<form action="{% url 'profile' %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input class="btn btn-primary" type="submit" value="Сохранить изменения">
+</form>
+</body>
+</html>
