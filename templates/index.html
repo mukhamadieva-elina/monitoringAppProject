@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitoring</title>
+</head>
+<body>
+<p>Мониторинг цен на маркетплейсах</p>
+<nav>
+    <ul>
+        {% if user.is_authenticated %}
+            <li><a href="{% url 'profile' %}">Профиль</a></li>
+            <li><a href="" class="down">Маркетплейсы</a>
+                <ul class="submenu">
+                    <li><a href="{% url 'wildberries' %}">Wildberries</a></li>
+                    <li><a href="">Ozon</a></li>
+                    <li><a href="">Яндекс маркет</a></li>
+                    <li><a href="">AliExpress</a></li>
+                </ul>
+            </li>
+            <li><a href="{% url 'logout' %}" >Выйти</a></li>
+        {% else %}
+            <li><a href="{% url 'login' %}" >Войти</a></li>
+        {% endif %}
+        <li><a href="" >Информация</a></li>
+    </ul>
+</nav>
+</body>
+</html>
