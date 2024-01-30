@@ -5,7 +5,8 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from monitoring.forms import LoginForm, RegistrationForm, ProfileForm
-from monitoring.models import User, EmailVerification, Product
+from monitoring.models import User, EmailVerification, Product, UserProduct
+from monitoring.wb_api_service import get_image, get_product_info
 
 
 def index(request):
@@ -76,11 +77,14 @@ def profile(request):
     return render(request, 'profile.html', context)
 
 
-# TODO
 def wildberries(request):
-    products = Product.objects.all()
-    list_products = []
+    if request.method == 'POST':
+        if get_product_info(request.POST['inputField']):
+            Product.add_product(user=request.user, article=request.POST['inputField'], marketplace_name='Wildberries')
+            return HttpResponseRedirect(reverse('wildberries'))
+    products = UserProduct.get_user_products(request.user, 'Wildberries')
+    product_form = []
     for product in products:
-        list_products.append(product.__str__())
-    context = {'products': products}
+        product_form.append([product.title, get_image(product.article), product.price])
+    context = {'products': product_form}
     return render(request, 'marketplace.html', context)

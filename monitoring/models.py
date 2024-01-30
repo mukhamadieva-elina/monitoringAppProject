@@ -22,24 +22,27 @@ class Product(models.Model):
 
     def __str__(self):
         return self.title
+
     @staticmethod
-    def create_product(article, marketplace_name):
-        marketplace = Marketplace.objects.get(name='Wildberries')
-        product = Product.objects.filter(article=article)
-        if not product:
-            product = get_product_info(article)
-            title = product[0]['name']
-            availability = False
-            for size in product[0]['sizes']:
-                if len(size['stocks']):
-                    availability = True
-                    break
-            if availability:
-                price = product[0]['salePriceU'] / 100
-            else:
-                price = -1
-            return Product.objects.create(article=article, title=title, availability=availability, price=price,
-                                          marketplace=marketplace)
+    def add_product(user, article, marketplace_name):
+        marketplace = Marketplace.objects.get(name=marketplace_name)
+        print(marketplace)
+        product = Product.objects.filter(article=article).first()
+        print(product)
+        match marketplace_name:
+            case 'Wildberries':
+                if not product:
+                    product_info = get_product_info(article)
+                    prod = Product.objects.create(article=article, title=product_info['title'],
+                                                  availability=product_info['availability'],
+                                                  price=product_info['price'],
+                                                  marketplace=marketplace)
+                    return UserProduct.objects.create(user=user, product=prod, start_price=product_info['price'])
+                else:
+                    user_product = UserProduct.objects.filter(user=user, product=product)
+                    if not user_product:
+                        product_info = get_product_info(article)
+                        return UserProduct.objects.create(user=user, product=product, start_price=product_info['price'])
 
 
 class User(AbstractUser):
@@ -51,10 +54,19 @@ class UserProduct(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=False)
     start_price = models.DecimalField(max_digits=15, decimal_places=2, null=False)
-    alert_threshold = models.IntegerField(default=None)
+    alert_threshold = models.IntegerField(default=None, null=True)
 
     class Meta:
         unique_together = ('user', 'product')
+
+    @staticmethod
+    def get_user_products(user, marketplace_name):
+        marketplace = Marketplace.objects.get(name=marketplace_name)
+        user_products = UserProduct.objects.filter(user=user, product__marketplace=marketplace)
+        products = []
+        for user_product in user_products:
+            products.append(user_product.product)
+        return products
 
 
 class EmailVerification(models.Model):
