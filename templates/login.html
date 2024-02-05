@@ -10,6 +10,7 @@
     {% csrf_token %}
     {{ form.as_p }}
     <input class="btn btn-primary" type="submit" value="Авторизоваться">
+    <a href="{% url 'registration' %}">Нет аккаунта? Зарегистрироваться</a>
 </form>
 </body>
 </html>

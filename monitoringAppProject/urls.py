@@ -18,10 +18,11 @@ from django.contrib import admin
 from django.urls import path, include
 
 from monitoring import views
+from monitoring.views import IndexView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.index, name='index'),
+    path('', IndexView.as_view(), name='index'),
     path('login/', views.login, name='login'),
     path('registration/', views.registration, name='registration'),
     path('monitoring/', include('monitoring.urls', namespace='monitoring')),

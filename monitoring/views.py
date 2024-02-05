@@ -4,14 +4,21 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
+from django.conf import settings
+from django.views.generic import TemplateView
+
 from monitoring.forms import LoginForm, RegistrationForm, ProfileForm
 from monitoring.models import User, EmailVerification, Product, UserProduct
 from monitoring.wb_api_service import get_image, get_product_info
 
 
-def index(request):
-    context = {}
-    return render(request, 'index.html', context)
+class IndexView(TemplateView):
+    template_name = 'index.html'
+
+
+# def index(request):
+#     context = {}
+#     return render(request, 'index.html', context)
 
 
 def login(request):
@@ -41,7 +48,6 @@ def registration(request):
         form = RegistrationForm(data=request.POST)
         if form.is_valid():
             form.save()
-            print("registration successful")
             return HttpResponseRedirect(reverse('index'))
     else:
         form = RegistrationForm
@@ -85,6 +91,16 @@ def wildberries(request):
     products = UserProduct.get_user_products(request.user, 'Wildberries')
     product_form = []
     for product in products:
-        product_form.append([product.title, get_image(product.article), product.price])
+        product_url = reverse('monitoring:product', kwargs={'article': product.article})
+        product_link = f'{settings.DOMAIN_NAME}{product_url}'
+        product_form.append([product.title, get_image(product.article), product.price, product_link])
     context = {'products': product_form}
     return render(request, 'marketplace.html', context)
+
+
+def product(request, **kwargs):
+    article = kwargs['article']
+    product_info = Product.objects.filter(article=article).first()
+    img_link = get_image(product_info.article)
+    context = {'product_info': product_info, 'img_link': img_link}
+    return render(request, 'product.html', context)

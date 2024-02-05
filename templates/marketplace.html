@@ -15,8 +15,8 @@
 </form>
 {% for product in products %}
 <tr>
-    <td>{{ product.0 }}</td>
-    <td><img src="{{ product.1 }}" width="100" height="120" ></td>
+    <td><a href="{{ product.3 }}">{{ product.0 }}</a></td>
+    <td><img src="{{ product.1 }}" width="100" height="120"></td>
     <td>{{ product.2 }} ₽</td><br />
 </tr>
 {% endfor %}

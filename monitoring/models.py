@@ -83,7 +83,6 @@ class EmailVerification(models.Model):
         verification_link = f'{settings.DOMAIN_NAME}{link}'
         subject = 'Verification'
         message = f'Your verification link {verification_link}'
-        print("before sending the message")
         send_mail(subject,
                   message,
                   settings.EMAIL_HOST_USER,
