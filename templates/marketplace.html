@@ -7,18 +7,19 @@
 <body>
 <p>Мои товары</p>
 
-<form id="myForm" action="{% url 'wildberries' %}" method="post">
+<form id="myForm" action="{% url 'monitoring:wildberries' %}" method="post">
     {% csrf_token %}
     <label for="inputField">Введите артикул товара:</label>
     <input type="text" id="inputField" name="inputField">
     <button type="submit">Отслеживать</button>
 </form>
 {% for product in products %}
-<tr>
-    <td><a href="{{ product.3 }}">{{ product.0 }}</a></td>
-    <td><img src="{{ product.1 }}" width="100" height="120"></td>
-    <td>{{ product.2 }} ₽</td><br />
-</tr>
+    <tr>
+        <td><a href="{{ product.3 }}">{{ product.0 }}</a></td>
+        <td><img src="{{ product.1 }}" width="100" height="120"></td>
+        <td>{{ product.2 }} ₽</td>
+        <br/>
+    </tr>
 {% endfor %}
 </body>
 </html>

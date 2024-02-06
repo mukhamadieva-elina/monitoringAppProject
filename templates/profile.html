@@ -6,7 +6,7 @@
 </head>
 <body>
 <p>Профиль</p>
-<form action="{% url 'profile' %}" method="post">
+<form action="{% url 'monitoring:profile' %}" method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <input class="btn btn-primary" type="submit" value="Сохранить изменения">

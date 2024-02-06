@@ -18,16 +18,10 @@ from django.contrib import admin
 from django.urls import path, include
 
 from monitoring import views
-from monitoring.views import IndexView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', IndexView.as_view(), name='index'),
-    path('login/', views.login, name='login'),
-    path('registration/', views.registration, name='registration'),
     path('monitoring/', include('monitoring.urls', namespace='monitoring')),
     path('verification/<str:email>/<uuid:verification_code>/', views.verification, name='verification'),
-    path('profile/', views.profile, name='profile'),
-    path('logout/', views.logout, name='logout'),
-    path('wb/', views.wildberries, name='wildberries')
+    path('products/', include('products.urls', namespace='products')),
 ]

@@ -1,24 +1,18 @@
+from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from django.conf import settings
-from django.views.generic import TemplateView
-
+from marketplaces.wildberries.wildberries import Wildberries
 from monitoring.forms import LoginForm, RegistrationForm, ProfileForm
-from monitoring.models import User, EmailVerification, Product, UserProduct
-from monitoring.wb_api_service import get_image, get_product_info
+from monitoring.models import User, EmailVerification, UserProduct
 
 
-class IndexView(TemplateView):
-    template_name = 'index.html'
-
-
-# def index(request):
-#     context = {}
-#     return render(request, 'index.html', context)
+def index(request):
+    context = {}
+    return render(request, 'index.html', context)
 
 
 def login(request):
@@ -31,7 +25,7 @@ def login(request):
             is_verified = User.objects.filter(username=username, is_verified=True).exists()
             if user and is_verified:
                 auth.login(request, user)
-                return HttpResponseRedirect(reverse('index'))
+                return HttpResponseRedirect(reverse('monitoring:index'))
     else:
         form = LoginForm()
     context = {'form': form}
@@ -40,7 +34,7 @@ def login(request):
 
 def logout(request):
     auth.logout(request)
-    return HttpResponseRedirect(reverse('index'))
+    return HttpResponseRedirect(reverse('monitoring:index'))
 
 
 def registration(request):
@@ -48,7 +42,7 @@ def registration(request):
         form = RegistrationForm(data=request.POST)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('index'))
+            return HttpResponseRedirect(reverse('monitoring:index'))
     else:
         form = RegistrationForm
     context = {'form': form}
@@ -63,9 +57,9 @@ def verification(request, **kwargs):
         if email_verification.exists():
             user.is_verified = True
             user.save()
-            return HttpResponseRedirect(reverse('login'))
+            return HttpResponseRedirect(reverse('monitoring:login'))
         else:
-            return HttpResponseRedirect(reverse('index'))
+            return HttpResponseRedirect(reverse('monitoring:index'))
 
 
 @login_required
@@ -74,7 +68,7 @@ def profile(request):
         form = ProfileForm(instance=request.user, data=request.POST)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('profile'))
+            return HttpResponseRedirect(reverse('monitoring:profile'))
         else:
             print(form.errors)
     else:
@@ -83,24 +77,18 @@ def profile(request):
     return render(request, 'profile.html', context)
 
 
+# TODO изменить контроллер так, чтобы работал с любым маркетплейсом
 def wildberries(request):
     if request.method == 'POST':
-        if get_product_info(request.POST['inputField']):
-            Product.add_product(user=request.user, article=request.POST['inputField'], marketplace_name='Wildberries')
-            return HttpResponseRedirect(reverse('wildberries'))
+        if Wildberries.get_product_info(request.POST['inputField']):
+            UserProduct.add_product(user=request.user, article=request.POST['inputField'],
+                                    marketplace_name='Wildberries')
+            return HttpResponseRedirect(reverse('monitoring:wildberries'))
     products = UserProduct.get_user_products(request.user, 'Wildberries')
     product_form = []
     for product in products:
-        product_url = reverse('monitoring:product', kwargs={'article': product.article})
+        product_url = reverse('products:product', kwargs={'article': product.article})
         product_link = f'{settings.DOMAIN_NAME}{product_url}'
-        product_form.append([product.title, get_image(product.article), product.price, product_link])
+        product_form.append([product.title, Wildberries.get_image(product.article), product.price, product_link])
     context = {'products': product_form}
     return render(request, 'marketplace.html', context)
-
-
-def product(request, **kwargs):
-    article = kwargs['article']
-    product_info = Product.objects.filter(article=article).first()
-    img_link = get_image(product_info.article)
-    context = {'product_info': product_info, 'img_link': img_link}
-    return render(request, 'product.html', context)

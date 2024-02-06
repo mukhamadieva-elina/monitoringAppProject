@@ -6,11 +6,11 @@
 </head>
 <body>
 <p>Авторизация</p>
-<form action="{% url 'login' %}" method="post">
+<form action="{% url 'monitoring:login' %}" method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <input class="btn btn-primary" type="submit" value="Авторизоваться">
-    <a href="{% url 'registration' %}">Нет аккаунта? Зарегистрироваться</a>
+    <a href="{% url 'monitoring:registration' %}">Нет аккаунта? Зарегистрироваться</a>
 </form>
 </body>
 </html>
